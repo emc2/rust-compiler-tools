@@ -156,11 +156,11 @@ impl<'a> Add<Symbol<'a>> for Cow<'a, str> {
     }
 }
 
-impl<'a> Add<Symbol<'a>> for String {
+impl Add<Symbol<'_>> for String {
     type Output = String;
 
     #[inline]
-    fn add(self, rhs: Symbol<'a>) -> Self::Output {
+    fn add(self, rhs: Symbol<'_>) -> Self::Output {
         self.add(rhs.0)
     }
 }
@@ -172,35 +172,35 @@ impl<'a> AddAssign<Symbol<'a>> for Cow<'a, str> {
     }
 }
 
-impl<'a> AddAssign<Symbol<'a>> for String {
+impl AddAssign<Symbol<'_>> for String {
     #[inline]
-    fn add_assign(&mut self, rhs: Symbol<'a>) {
+    fn add_assign(&mut self, rhs: Symbol<'_>) {
         self.add_assign(rhs.0)
     }
 }
 
-impl<'a> AsRef<str> for Symbol<'a> {
+impl AsRef<str> for Symbol<'_> {
     #[inline]
     fn as_ref(&self) -> &str {
         self.0
     }
 }
 
-impl<'a> AsRef<[u8]> for Symbol<'a> {
+impl AsRef<[u8]> for Symbol<'_> {
     #[inline]
     fn as_ref(&self) -> &[u8] {
         self.0.as_ref()
     }
 }
 
-impl<'a> AsRef<OsStr> for Symbol<'a> {
+impl AsRef<OsStr> for Symbol<'_> {
     #[inline]
     fn as_ref(&self) -> &OsStr {
         OsStr::new(self.0)
     }
 }
 
-impl<'a> AsRef<Path> for Symbol<'a> {
+impl AsRef<Path> for Symbol<'_> {
     #[inline]
     fn as_ref(&self) -> &Path {
         Path::new(self.0)
@@ -214,21 +214,21 @@ impl<'a> Clone for Symbol<'a> {
     }
 }
 
-impl<'a> Default for Symbol<'a> {
+impl Default for Symbol<'_> {
     #[inline]
     fn default() -> Self {
         NULL_SYM
     }
 }
 
-impl<'a> Debug for Symbol<'a> {
+impl Debug for Symbol<'_> {
     #[inline]
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, "#{}({})", self.id(), self.0)
     }
 }
 
-impl<'a> Display for Symbol<'a> {
+impl Display for Symbol<'_> {
     #[inline]
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, "{}", self.0)
@@ -242,14 +242,14 @@ impl<'a> From<Symbol<'a>> for &'a str {
     }
 }
 
-impl<'a> From<Symbol<'a>> for String {
+impl From<Symbol<'_>> for String {
     #[inline]
-    fn from(s: Symbol<'a>) -> String {
+    fn from(s: Symbol<'_>) -> String {
         String::from(s.0)
     }
 }
 
-impl<'a> Hash for Symbol<'a> {
+impl Hash for Symbol<'_> {
     #[inline]
     fn hash<H>(&self, state: &mut H)
     where H: Hasher {
@@ -257,7 +257,7 @@ impl<'a> Hash for Symbol<'a> {
     }
 }
 
-impl<'a, I> Index<I> for Symbol<'a>
+impl<I> Index<I> for Symbol<'_>
 where I: SliceIndex<str> {
     type Output = I::Output;
 
@@ -274,28 +274,28 @@ impl<'a> PartialEq<Cow<'a, str>> for Symbol<'a> {
     }
 }
 
-impl<'a> PartialEq<OsStr> for Symbol<'a> {
+impl PartialEq<OsStr> for Symbol<'_> {
     #[inline]
     fn eq(&self, other: &OsStr) -> bool {
         self.0.eq(other)
     }
 }
 
-impl<'a> PartialEq<OsString> for Symbol<'a> {
+impl PartialEq<OsString> for Symbol<'_> {
     #[inline]
     fn eq(&self, other: &OsString) -> bool {
         self.0.eq(other)
     }
 }
 
-impl<'a> PartialEq<String> for Symbol<'a> {
+impl PartialEq<String> for Symbol<'_> {
     #[inline]
     fn eq(&self, other: &String) -> bool {
         self.0.eq(other)
     }
 }
 
-impl<'a> PartialEq<str> for Symbol<'a> {
+impl PartialEq<str> for Symbol<'_> {
     #[inline]
     fn eq(&self, other: &str) -> bool {
         self.0.eq(other)
@@ -309,65 +309,65 @@ impl<'a> PartialEq<Symbol<'a>> for Cow<'a, str> {
     }
 }
 
-impl<'a> PartialEq<Symbol<'a>> for OsStr {
+impl PartialEq<Symbol<'_>> for OsStr {
     #[inline]
-    fn eq(&self, other: &Symbol<'a>) -> bool {
+    fn eq(&self, other: &Symbol<'_>) -> bool {
         self.eq(other.0)
     }
 }
 
-impl<'a> PartialEq<Symbol<'a>> for OsString {
+impl PartialEq<Symbol<'_>> for OsString {
     #[inline]
-    fn eq(&self, other: &Symbol<'a>) -> bool {
+    fn eq(&self, other: &Symbol<'_>) -> bool {
         self.eq(other.0)
     }
 }
 
-impl<'a> PartialEq<Symbol<'a>> for String {
+impl PartialEq<Symbol<'_>> for String {
     #[inline]
-    fn eq(&self, other: &Symbol<'a>) -> bool {
+    fn eq(&self, other: &Symbol<'_>) -> bool {
         self.eq(other.0)
     }
 }
 
-impl<'a> PartialEq<Symbol<'a>> for str {
+impl PartialEq<Symbol<'_>> for str {
     #[inline]
-    fn eq(&self, other: &Symbol<'a>) -> bool {
+    fn eq(&self, other: &Symbol<'_>) -> bool {
         self.eq(other.0)
     }
 }
 
-impl<'a> PartialEq for Symbol<'a> {
+impl PartialEq for Symbol<'_> {
     #[inline]
-    fn eq(&self, other: &Symbol<'a>) -> bool {
+    fn eq(&self, other: &Symbol<'_>) -> bool {
         self.id() == other.id()
     }
 }
 
-impl<'a> PartialOrd<Symbol<'a>> for OsStr {
+impl PartialOrd<Symbol<'_>> for OsStr {
     #[inline]
-    fn partial_cmp(&self, other: &Symbol<'a>) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Symbol<'_>) -> Option<Ordering> {
         self.partial_cmp(other.0)
     }
 }
 
-impl<'a> PartialOrd<Symbol<'a>> for OsString {
+impl PartialOrd<Symbol<'_>> for OsString {
     #[inline]
-    fn partial_cmp(&self, other: &Symbol<'a>) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Symbol<'_>) -> Option<Ordering> {
         self.partial_cmp(other.0)
     }
 }
 
-impl<'a> PartialOrd for Symbol<'a> {
+impl PartialOrd for Symbol<'_> {
     #[inline]
-    fn partial_cmp(&self, other: &Symbol<'a>) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Symbol<'_>) -> Option<Ordering> {
         Some(self.id().cmp(&other.id()))
     }
 }
 
-unsafe impl<'a> Send for Symbol<'a> {}
+unsafe impl Send for Symbol<'_> {}
 
-unsafe impl<'a> Sync for Symbol<'a> {}
+unsafe impl Sync for Symbol<'_> {}
 
 impl Symbols {
     /// Create a new `Symbols`.
