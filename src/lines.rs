@@ -1,32 +1,95 @@
-use std::cmp::Ordering;
-
-/// Representation of one line.
-#[derive(Debug)]
-struct Line<C> {
-    /// Start of the line.
-    start: usize,
-    /// Content of the line.
-    content: C
-}
+use std::fmt::Debug;
+use std::fmt::Display;
+use std::fmt::Error;
+use std::fmt::Formatter;
+use std::ops::Add;
+use std::ops::AddAssign;
 
 /// A structure holding lines in a source file.
 #[derive(Debug)]
-pub struct Lines<C> {
-    /// Vector of lines, can be binary searched by position.
-    lines: Vec<Line<C>>
+pub struct LineOffsets {
+    /// Vector of offsets for the start of each line, can be binary
+    /// searched by position.
+    lines: Vec<usize>
 }
 
-impl<C> Lines<C> {
-    /// Create a new `Lines`.
+#[derive(Clone, Copy, Eq, Hash, PartialEq, PartialOrd, Ord)]
+pub struct Offset(usize);
+
+impl Add for Offset {
+    type Output = Offset;
+
+    fn add(self, rhs: Offset) -> Offset {
+        Offset(self.0 + rhs.0)
+    }
+}
+
+impl Add<&'_ Offset> for Offset {
+    type Output = Offset;
+
+    fn add(self, rhs: &'_ Offset) -> Offset {
+        Offset(self.0 + rhs.0)
+    }
+}
+
+impl Add<usize> for Offset {
+    type Output = Offset;
+
+    fn add(self, rhs: usize) -> Offset {
+        Offset(self.0 + rhs)
+    }
+}
+
+impl AddAssign for Offset {
+    fn add_assign(&mut self, rhs: Offset) {
+        self.0 += rhs.0
+    }
+}
+
+impl AddAssign<&'_ Offset> for Offset {
+    fn add_assign(&mut self, rhs: &'_ Offset) {
+        self.0 += rhs.0
+    }
+}
+
+impl AddAssign<usize> for Offset {
+    fn add_assign(&mut self, rhs: usize) {
+        self.0 += rhs
+    }
+}
+
+impl Debug for Offset {
+    #[inline]
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Display for Offset {
+    #[inline]
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<usize> for Offset {
+    #[inline]
+    fn from(val: usize) -> Offset {
+        Offset(val)
+    }
+}
+
+impl LineOffsets {
+    /// Create a new `LineOffsets`.
     #[inline]
     pub fn new() -> Self {
-        Lines { lines: Vec::new() }
+        LineOffsets { lines: Vec::new() }
     }
 
-    /// Create a new `Lines` with a specific initial capacity.
+    /// Create a new `LineOffsets` with a specific initial capacity.
     #[inline]
     pub fn with_capacity(size: usize) -> Self {
-        Lines { lines: Vec::with_capacity(size) }
+        LineOffsets { lines: Vec::with_capacity(size) }
     }
 
     /// Shrink this structure to fit its current contents.
@@ -40,20 +103,20 @@ impl<C> Lines<C> {
     /// This will convert the absolute file offset `pos` into a line
     /// number and offset pair.
     #[inline]
-    pub fn lookup(&self, pos: usize) -> (usize, usize, &C) {
-        match self.lines.binary_search_by(|x| x.start.cmp(&pos)) {
-            Ok(idx) => (idx, 0, &self.lines[idx].content),
+    pub fn lookup(&self, pos: Offset) -> (usize, usize) {
+        match self.lines.binary_search(&pos.0) {
+            Ok(idx) => (idx, 0),
             Err(idx) => {
-                let start = self.lines[idx].start;
+                let start = self.lines[idx];
 
-                (idx, pos - start, &self.lines[idx].content)
+                (idx, pos.0 - start)
             }
         }
     }
 
-    /// Add a line definition to the end of this `Lines`.
+    /// Add a line definition to the end of this `LineOffsets`.
     #[inline]
-    pub fn push_line(&mut self, start: usize, content: C) {
-        self.lines.push(Line { start: start, content: content })
+    pub fn push_line(&mut self, start: usize) {
+        self.lines.push(start)
     }
 }

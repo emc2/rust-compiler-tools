@@ -1,3 +1,5 @@
+use crate::lines::LineOffsets;
+use crate::nondistinct::Nondistinct;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -5,6 +7,7 @@ use std::collections::hash_map::Entry;
 use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::fmt::Debug;
+use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fs::Metadata;
 use std::hash::Hash;
@@ -13,25 +16,38 @@ use std::io::Error;
 use std::iter::IntoIterator;
 use std::path::Ancestors;
 use std::path::Components;
-use std::path::Display;
 use std::path::Iter;
 use std::path::Path;
 use std::path::PathBuf;
 use std::path::StripPrefixError;
 
-/// A distinguished type for symbols.
+/// A distinguished type for file paths.
 ///
 /// These are pointers to interned strings, and function similar to
-/// `&'a str`s, except that they are much more efficient to hash and
+/// [`Path`]s, except that they are much more efficient to hash and
 /// compare (these use the address of the interned string).  This is a
 /// common technique employed in compiler implementation, as string
 /// hashing and comparison is so common.
-#[derive(Copy, Eq, Ord)]
+#[derive(Clone, Copy)]
 pub struct Filename<'a>(&'a Path);
 
+/// Interned filenames table, for producing [`Filename`]s.
 pub struct Filenames {
-    // Interned [Path]s
+    /// Interned [Path]s
     interned: HashMap<PathBuf, ()>
+}
+
+/// Line offsets for a given file.
+///
+/// Note that the line offsets are assumed to be completely determined
+/// by the filename; thus, the offsets themselves are not used in
+/// equality, comparison, and hashing.
+#[derive(Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
+pub struct FileOffsets<'a> {
+    /// The name of the file.
+    filename: Filename<'a>,
+    /// Lines structure for the file.
+    line_offsets: Nondistinct<LineOffsets>,
 }
 
 impl<'a> Filename<'a> {
@@ -172,7 +188,7 @@ impl<'a> Filename<'a> {
 
     /// See [`Path::display`].
     #[inline]
-    pub fn display(&self) -> Display<'_> {
+    pub fn display(&self) -> std::path::Display<'_> {
         self.0.display()
     }
 
@@ -220,19 +236,21 @@ impl AsRef<OsStr> for Filename<'_> {
     }
 }
 
-impl<'a> Clone for Filename<'a> {
-    #[inline]
-    fn clone(&self) -> Filename<'a> {
-        Filename(self.0)
-    }
-}
-
 impl Debug for Filename<'_> {
     #[inline]
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(formatter)
     }
 }
+
+impl Display for Filename<'_> {
+    #[inline]
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(formatter)
+    }
+}
+
+impl Eq for Filename<'_> {}
 
 impl<'a> From<Filename<'a>> for Cow<'a, Path> {
     #[inline]
@@ -245,7 +263,7 @@ impl Hash for Filename<'_> {
     #[inline]
     fn hash<H>(&self, state: &mut H)
     where H: Hasher {
-        state.write_usize(self.id());
+        self.id().hash(state);
     }
 }
 
@@ -256,6 +274,13 @@ impl<'a> IntoIterator for Filename<'a> {
     #[inline]
     fn into_iter(self) -> Iter<'a> {
         self.0.into_iter()
+    }
+}
+
+impl Ord for Filename<'_> {
+    #[inline]
+    fn cmp(&self, other: &Filename<'_>) -> Ordering {
+        self.id().cmp(&other.id())
     }
 }
 
@@ -510,5 +535,26 @@ impl Filenames {
                 }
             }
         }
+    }
+}
+
+impl<'a> FileOffsets<'a> {
+    /// Create a `FileOffsets` from its components.
+    #[inline]
+    pub fn new(filename: Filename<'a>, line_offsets: LineOffsets) -> Self {
+        FileOffsets { line_offsets: Nondistinct::from(line_offsets),
+                      filename: filename }
+    }
+
+    /// Get the [`Filename`] for this `FileOffsets`.
+    #[inline]
+    pub fn filename(&self) -> Filename<'a> {
+        self.filename
+    }
+
+    /// Get the [`LineOffsets`] for this `FileOffsets`.
+    #[inline]
+    pub fn line_offsets(&self) -> &LineOffsets {
+        &self.line_offsets.val
     }
 }

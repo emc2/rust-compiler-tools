@@ -87,7 +87,7 @@ impl<'a> Symbol<'a> {
         self.0.as_ptr()
     }
 
-    /// See [`str::as_chars`].
+    /// See [`str::chars`].
     #[inline]
     pub fn chars(&self) -> Chars<'_> {
         self.0.chars()
