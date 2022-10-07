@@ -1,3 +1,4 @@
+use crate::position::Positioned;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::fmt::Display;
@@ -84,5 +85,12 @@ impl<T> PartialOrd for Nondistinct<T> {
     #[inline]
     fn partial_cmp(&self, other: &Nondistinct<T>) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+impl<P> Positioned<P> for Nondistinct<P> {
+    #[inline]
+    fn position(&self) -> &P {
+        &self.val
     }
 }
