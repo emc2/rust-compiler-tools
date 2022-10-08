@@ -44,11 +44,11 @@ pub trait MessagePositions<P>: Message  {
     }
 }
 
-pub trait MessageWriter<'a> {
+pub trait MessageWriter {
     /// Write a message out to the `stream`.
-    fn write_msg<M, P, W>(&self, msg: &'a M, out: &mut W) ->
+    fn write_msg<'a, M, P, W>(&self, msg: &'a M, out: &mut W) ->
         Result<(), Error>
-    where &'a FilePosition<'a>: TryFrom<&'a P, Error = ()>,
+    where &'a FilePosition<'a>: TryFrom<&'a P>,
           M: MessagePositions<P>,
           W: WriteColor,
           P: 'a + Display;
@@ -167,10 +167,10 @@ impl Display for Severity {
     }
 }
 
-impl<'a> MessageWriter<'a> for MessageFullWriter<'a> {
-    fn write_msg<M, P, W>(&self, msg: &'a M, out: &mut W) ->
+impl MessageWriter for MessageFullWriter<'_> {
+    fn write_msg<'a, M, P, W>(&self, msg: &'a M, out: &mut W) ->
         Result<(), Error>
-    where &'a FilePosition<'a>: TryFrom<&'a P, Error = ()>,
+    where &'a FilePosition<'a>: TryFrom<&'a P>,
           M: MessagePositions<P>,
           W: WriteColor,
           P: 'a + Display {
@@ -202,7 +202,7 @@ impl<'a> MessageWriter<'a> for MessageFullWriter<'a> {
 
             write!(out, " {}:", pos)?;
 
-            let filepos: Result<&'a FilePosition<'a>, ()> = pos.try_into();
+            let filepos: Result<&'a FilePosition<'a>, _> = pos.try_into();
 
             match filepos {
                 Ok(FilePosition::Portion { offset, file_offsets}) => {
@@ -287,10 +287,10 @@ impl<'a> MessageWriter<'a> for MessageFullWriter<'a> {
     }
 }
 
-impl<'a> MessageWriter<'a> for MessageSimpleWriter {
-    fn write_msg<M, P, W>(&self, msg: &'a M, out: &mut W) ->
+impl MessageWriter for MessageSimpleWriter {
+    fn write_msg<'a, M, P, W>(&self, msg: &'a M, out: &mut W) ->
         Result<(), Error>
-    where &'a FilePosition<'a>: TryFrom<&'a P, Error = ()>,
+    where &'a FilePosition<'a>: TryFrom<&'a P>,
           M: MessagePositions<P>,
           W: WriteColor,
           P: 'a + Display {
@@ -322,10 +322,10 @@ impl<'a> MessageWriter<'a> for MessageSimpleWriter {
     }
 }
 
-impl<'a> MessageWriter<'a> for MessageMinimalWriter {
-    fn write_msg<M, P, W>(&self, msg: &'a M, out: &mut W) ->
+impl MessageWriter for MessageMinimalWriter {
+    fn write_msg<'a, M, P, W>(&self, msg: &'a M, out: &mut W) ->
         Result<(), Error>
-    where &'a FilePosition<'a>: TryFrom<&'a P, Error = ()>,
+    where &'a FilePosition<'a>: TryFrom<&'a P>,
           M: MessagePositions<P>,
           W: WriteColor,
           P: 'a + Display {
