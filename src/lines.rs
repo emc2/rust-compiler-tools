@@ -79,6 +79,20 @@ impl From<usize> for Offset {
     }
 }
 
+impl From<Offset> for usize {
+    #[inline]
+    fn from(val: Offset) -> usize {
+        val.0
+    }
+}
+
+impl From<&'_ Offset> for usize {
+    #[inline]
+    fn from(val: &'_ Offset) -> usize {
+        val.0
+    }
+}
+
 impl LineOffsets {
     /// Create a new `LineOffsets`.
     #[inline]

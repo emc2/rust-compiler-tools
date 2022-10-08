@@ -3,6 +3,7 @@ use crate::files::Filename;
 use crate::lines::LineOffsets;
 use crate::lines::Offset;
 use crate::nondistinct::Nondistinct;
+use std::convert::TryFrom;
 use std::fmt::Display;
 use std::fmt::Error;
 use std::fmt::Formatter;
@@ -195,6 +196,28 @@ impl Display for BasicPosition<'_> {
             BasicPosition::CmdLine { .. } => {
                 write!(f, "from command line")
             }
+        }
+    }
+}
+
+impl<'a> TryFrom<BasicPosition<'a>> for FilePosition<'a> {
+    type Error = ();
+
+    fn try_from(val: BasicPosition<'a>) -> Result<Self, Self::Error> {
+        match val {
+            BasicPosition::File { pos } => Ok(pos),
+            _ => Err(())
+        }
+    }
+}
+
+impl<'a> TryFrom<&'a BasicPosition<'a>> for &'a FilePosition<'a> {
+    type Error = ();
+
+    fn try_from(val: &'a BasicPosition<'a>) -> Result<Self, Self::Error> {
+        match val {
+            BasicPosition::File { pos } => Ok(pos),
+            _ => Err(())
         }
     }
 }
