@@ -44,6 +44,7 @@ pub trait MessagePositions<P>: Message  {
     }
 }
 
+/// Trait for modes of writing out compiler messages.
 pub trait MessageWriter {
     /// Write a message out to the `stream`.
     fn write_msg<'a, M, P, W>(&self, msg: &'a M, out: &mut W) ->
@@ -54,6 +55,7 @@ pub trait MessageWriter {
           P: 'a + Display;
 }
 
+/// Message severity levels.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Severity {
     /// Purely informative message, not implying any sort of criticism.
@@ -215,8 +217,7 @@ impl MessageWriter for MessageFullWriter<'_> {
                             write!(out, "{}", prefix)?;
 
                             if out.supports_color() {
-                                out.set_color(ColorSpec::new()
-                                              .set_fg(Some(severity.color())))?;
+                                out.set_color(&color)?;
                                 write!(out, "{}", selected)?;
                                 out.reset()?;
                             } else {
