@@ -118,13 +118,18 @@ impl LineOffsets {
     /// number and offset pair.
     #[inline]
     pub fn lookup(&self, pos: Offset) -> (usize, usize) {
-        match self.lines.binary_search(&pos.0) {
-            Ok(idx) => (idx, 0),
-            Err(idx) => {
-                let start = self.lines[idx];
+        if self.lines.len() > 0 {
+            match self.lines.binary_search(&pos.0) {
+                Ok(idx) => (idx + 1, 0),
+                Err(idx) if idx > 0 => {
+                    let start = self.lines[idx - 1];
 
-                (idx, pos.0 - start)
+                    (idx, pos.0 - start)
+                },
+                Err(_) => (0, pos.0)
             }
+        } else {
+            (0, pos.0)
         }
     }
 

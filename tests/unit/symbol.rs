@@ -1,7 +1,7 @@
 use compiler_tools::symbol::Symbols;
 
 #[test]
-fn test_ref_equality() {
+fn test_symbol_equality() {
     let hello_a = "helloa";
     let hello_b = "hellob";
     let mut gensym = Symbols::new();
@@ -12,7 +12,7 @@ fn test_ref_equality() {
 }
 
 #[test]
-fn test_ref_non_equality() {
+fn test_symbol_non_equality() {
     let hello_a = "helloa";
     let hello_b = "hellob";
     let mut gensym = Symbols::new();
@@ -28,5 +28,26 @@ fn test_eq_str() {
     let mut gensym = Symbols::new();
     let sym = gensym.symbol_nonnull(&hello);
 
-    assert_eq!(&sym, "hello")
+    assert_eq!(&sym, "hello");
+    assert_eq!("hello", &sym)
+}
+
+#[test]
+fn test_ne_str() {
+    let hello = "helloa";
+    let mut gensym = Symbols::new();
+    let sym = gensym.symbol_nonnull(&hello);
+
+    assert_ne!(&sym, "hellob");
+    assert_ne!("hellob", &sym)
+}
+
+#[test]
+fn test_ord_str() {
+    let hello = "helloa";
+    let mut gensym = Symbols::new();
+    let sym = gensym.symbol_nonnull(&hello);
+
+    assert!(&sym < "hellob");
+    assert!("hellob" > &sym)
 }

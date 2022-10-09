@@ -346,6 +346,20 @@ impl PartialEq for Symbol<'_> {
     }
 }
 
+impl PartialOrd<str> for Symbol<'_> {
+    #[inline]
+    fn partial_cmp(&self, other: &str) -> Option<Ordering> {
+        self.0.partial_cmp(other)
+    }
+}
+
+impl PartialOrd<String> for Symbol<'_> {
+    #[inline]
+    fn partial_cmp(&self, other: &String) -> Option<Ordering> {
+        self.0.partial_cmp(other.as_str())
+    }
+}
+
 impl PartialOrd<Symbol<'_>> for OsStr {
     #[inline]
     fn partial_cmp(&self, other: &Symbol<'_>) -> Option<Ordering> {
@@ -354,6 +368,20 @@ impl PartialOrd<Symbol<'_>> for OsStr {
 }
 
 impl PartialOrd<Symbol<'_>> for OsString {
+    #[inline]
+    fn partial_cmp(&self, other: &Symbol<'_>) -> Option<Ordering> {
+        self.partial_cmp(other.0)
+    }
+}
+
+impl PartialOrd<Symbol<'_>> for String {
+    #[inline]
+    fn partial_cmp(&self, other: &Symbol<'_>) -> Option<Ordering> {
+        self.as_str().partial_cmp(other.0)
+    }
+}
+
+impl PartialOrd<Symbol<'_>> for str {
     #[inline]
     fn partial_cmp(&self, other: &Symbol<'_>) -> Option<Ordering> {
         self.partial_cmp(other.0)

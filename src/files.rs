@@ -14,6 +14,7 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::Error;
 use std::iter::IntoIterator;
+use std::marker::PhantomData;
 use std::path::Ancestors;
 use std::path::Components;
 use std::path::Iter;
@@ -32,7 +33,8 @@ use std::path::StripPrefixError;
 pub struct Filename<'a>(&'a Path);
 
 /// Interned filenames table, for producing [`Filename`]s.
-pub struct Filenames {
+pub struct Filenames<'a> {
+    lifetime: PhantomData<&'a Path>,
     /// Interned [Path]s
     interned: HashMap<PathBuf, ()>
 }
@@ -287,98 +289,140 @@ impl Ord for Filename<'_> {
 impl<'a, 'b> PartialEq<&'a OsStr> for Filename<'b> {
     #[inline]
     fn eq(&self, other: &&'a OsStr) -> bool {
-        self.0.eq(other)
+        match PathBuf::from(other).canonicalize() {
+            Ok(pathbuf) => self.0.eq(&pathbuf),
+            Err(_) => false
+        }
     }
 }
 
 impl<'a, 'b> PartialEq<Filename<'b>> for &'a OsStr {
     #[inline]
     fn eq(&self, other: &Filename<'b>) -> bool {
-        self.eq(other.0)
+        match PathBuf::from(self).canonicalize() {
+            Ok(pathbuf) => pathbuf.eq(other.0),
+            Err(_) => false
+        }
     }
 }
 
 impl<'a, 'b> PartialEq<Filename<'a>> for Cow<'b, Path> {
     #[inline]
     fn eq(&self, other: &Filename<'a>) -> bool {
-        self.eq(other.0)
+        match self.canonicalize() {
+            Ok(pathbuf) => pathbuf.eq(other.0),
+            Err(_) => false
+        }
     }
 }
 
 impl<'a, 'b> PartialEq<Filename<'a>> for Cow<'b, OsStr> {
     #[inline]
     fn eq(&self, other: &Filename<'a>) -> bool {
-        self.eq(other.0)
+        match PathBuf::from(self).canonicalize() {
+            Ok(pathbuf) => pathbuf.eq(other.0),
+            Err(_) => false
+        }
     }
 }
 
 impl PartialEq<Filename<'_>> for OsStr {
     #[inline]
     fn eq(&self, other: &Filename<'_>) -> bool {
-        self.eq(other.0)
+        match PathBuf::from(self).canonicalize() {
+            Ok(pathbuf) => pathbuf.eq(other.0),
+            Err(_) => false
+        }
     }
 }
 
 impl PartialEq<Filename<'_>> for OsString {
     #[inline]
     fn eq(&self, other: &Filename<'_>) -> bool {
-        self.eq(other.0)
+        match PathBuf::from(self).canonicalize() {
+            Ok(pathbuf) => pathbuf.eq(other.0),
+            Err(_) => false
+        }
     }
 }
 
 impl PartialEq<Filename<'_>> for Path {
     #[inline]
     fn eq(&self, other: &Filename<'_>) -> bool {
-        self.eq(other.0)
+        match self.canonicalize() {
+            Ok(pathbuf) => pathbuf.eq(other.0),
+            Err(_) => false
+        }
     }
 }
 
 impl PartialEq<Filename<'_>> for PathBuf {
     #[inline]
     fn eq(&self, other: &Filename<'_>) -> bool {
-        self.eq(other.0)
+        match self.canonicalize() {
+            Ok(pathbuf) => pathbuf.eq(other.0),
+            Err(_) => false
+        }
     }
 }
 
 impl<'a, 'b> PartialEq<Cow<'a, Path>> for Filename<'b> {
     #[inline]
     fn eq(&self, other: &Cow<'a, Path>) -> bool {
-        self.0.eq(other)
+        match other.canonicalize() {
+            Ok(pathbuf) => self.0.eq(&pathbuf),
+            Err(_) => false
+        }
     }
 }
 
 impl<'a, 'b> PartialEq<Cow<'a, OsStr>> for Filename<'b> {
     #[inline]
     fn eq(&self, other: &Cow<'a, OsStr>) -> bool {
-        self.0.eq(other)
+        match PathBuf::from(other).canonicalize() {
+            Ok(pathbuf) => self.0.eq(&pathbuf),
+            Err(_) => false
+        }
     }
 }
 
 impl PartialEq<OsStr> for Filename<'_> {
     #[inline]
     fn eq(&self, other: &OsStr) -> bool {
-        self.0.eq(other)
+        match PathBuf::from(other).canonicalize() {
+            Ok(pathbuf) => self.0.eq(&pathbuf),
+            Err(_) => false
+        }
     }
 }
 
 impl PartialEq<OsString> for Filename<'_> {
     #[inline]
     fn eq(&self, other: &OsString) -> bool {
-        self.0.eq(other)
+        match PathBuf::from(other).canonicalize() {
+            Ok(pathbuf) => self.0.eq(&pathbuf),
+            Err(_) => false
+        }
     }
 }
 
 impl PartialEq<Path> for Filename<'_> {
     #[inline]
     fn eq(&self, other: &Path) -> bool {
-        self.0.eq(other)
+        match other.canonicalize() {
+            Ok(pathbuf) => self.0.eq(&pathbuf),
+            Err(_) => false
+        }
     }
 }
 
 impl PartialEq<PathBuf> for Filename<'_> {
     #[inline]
     fn eq(&self, other: &PathBuf) -> bool {
-        self.0.eq(other)
+        match other.canonicalize() {
+            Ok(pathbuf) => self.0.eq(&pathbuf),
+            Err(_) => false
+        }
     }
 }
 
@@ -392,98 +436,140 @@ impl PartialEq for Filename<'_> {
 impl<'a, 'b> PartialOrd<&'a OsStr> for Filename<'b> {
     #[inline]
     fn partial_cmp(&self, other: &&'a OsStr) -> Option<Ordering> {
-        self.0.partial_cmp(other)
+        match PathBuf::from(other).canonicalize() {
+            Ok(pathbuf) => self.0.partial_cmp(&pathbuf),
+            Err(_) => None
+        }
     }
 }
 
 impl<'a, 'b> PartialOrd<Filename<'b>> for &'a OsStr {
     #[inline]
     fn partial_cmp(&self, other: &Filename<'b>) -> Option<Ordering> {
-        self.partial_cmp(other.0)
+        match PathBuf::from(self).canonicalize() {
+            Ok(pathbuf) => pathbuf.partial_cmp(other.0),
+            Err(_) => None
+        }
     }
 }
 
 impl<'a, 'b> PartialOrd<Filename<'a>> for Cow<'b, Path> {
     #[inline]
     fn partial_cmp(&self, other: &Filename<'a>) -> Option<Ordering> {
-        self.partial_cmp(other.0)
+        match self.canonicalize() {
+            Ok(pathbuf) => pathbuf.partial_cmp(other.0),
+            Err(_) => None
+        }
     }
 }
 
 impl<'a, 'b> PartialOrd<Filename<'a>> for Cow<'b, OsStr> {
     #[inline]
     fn partial_cmp(&self, other: &Filename<'a>) -> Option<Ordering> {
-        self.partial_cmp(other.0)
+        match PathBuf::from(self).canonicalize() {
+            Ok(pathbuf) => pathbuf.partial_cmp(other.0),
+            Err(_) => None
+        }
     }
 }
 
 impl PartialOrd<Filename<'_>> for OsStr {
     #[inline]
     fn partial_cmp(&self, other: &Filename<'_>) -> Option<Ordering> {
-        self.partial_cmp(other.0)
+        match PathBuf::from(self).canonicalize() {
+            Ok(pathbuf) => pathbuf.partial_cmp(other.0),
+            Err(_) => None
+        }
     }
 }
 
 impl PartialOrd<Filename<'_>> for OsString {
     #[inline]
     fn partial_cmp(&self, other: &Filename<'_>) -> Option<Ordering> {
-        self.partial_cmp(other.0)
+        match PathBuf::from(self).canonicalize() {
+            Ok(pathbuf) => pathbuf.partial_cmp(other.0),
+            Err(_) => None
+        }
     }
 }
 
 impl PartialOrd<Filename<'_>> for Path {
     #[inline]
     fn partial_cmp(&self, other: &Filename<'_>) -> Option<Ordering> {
-        self.partial_cmp(other.0)
+        match self.canonicalize() {
+            Ok(pathbuf) => pathbuf.partial_cmp(other.0),
+            Err(_) => None
+        }
     }
 }
 
 impl PartialOrd<Filename<'_>> for PathBuf {
     #[inline]
     fn partial_cmp(&self, other: &Filename<'_>) -> Option<Ordering> {
-        self.partial_cmp(other.0)
+        match self.canonicalize() {
+            Ok(pathbuf) => pathbuf.partial_cmp(other.0),
+            Err(_) => None
+        }
     }
 }
 
 impl<'a, 'b> PartialOrd<Cow<'a, Path>> for Filename<'b> {
     #[inline]
     fn partial_cmp(&self, other: &Cow<'a, Path>) -> Option<Ordering> {
-        self.0.partial_cmp(other)
+        match other.canonicalize() {
+            Ok(pathbuf) => self.0.partial_cmp(&pathbuf),
+            Err(_) => None
+        }
     }
 }
 
 impl<'a, 'b> PartialOrd<Cow<'a, OsStr>> for Filename<'b> {
     #[inline]
     fn partial_cmp(&self, other: &Cow<'a, OsStr>) -> Option<Ordering> {
-        self.0.partial_cmp(other)
+        match PathBuf::from(other).canonicalize() {
+            Ok(pathbuf) => self.0.partial_cmp(&pathbuf),
+            Err(_) => None
+        }
     }
 }
 
 impl PartialOrd<OsStr> for Filename<'_> {
     #[inline]
     fn partial_cmp(&self, other: &OsStr) -> Option<Ordering> {
-        self.0.partial_cmp(other)
+        match PathBuf::from(other).canonicalize() {
+            Ok(pathbuf) => self.0.partial_cmp(&pathbuf),
+            Err(_) => None
+        }
     }
 }
 
 impl PartialOrd<OsString> for Filename<'_> {
     #[inline]
     fn partial_cmp(&self, other: &OsString) -> Option<Ordering> {
-        self.0.partial_cmp(other)
+        match PathBuf::from(other).canonicalize() {
+            Ok(pathbuf) => self.0.partial_cmp(&pathbuf),
+            Err(_) => None
+        }
     }
 }
 
 impl PartialOrd<Path> for Filename<'_> {
     #[inline]
     fn partial_cmp(&self, other: &Path) -> Option<Ordering> {
-        self.0.partial_cmp(other)
+        match other.canonicalize() {
+            Ok(pathbuf) => self.0.partial_cmp(&pathbuf),
+            Err(_) => None
+        }
     }
 }
 
 impl PartialOrd<PathBuf> for Filename<'_> {
     #[inline]
     fn partial_cmp(&self, other: &PathBuf) -> Option<Ordering> {
-        self.0.partial_cmp(other)
+        match other.canonicalize() {
+            Ok(pathbuf) => self.0.partial_cmp(&pathbuf),
+            Err(_) => None
+        }
     }
 }
 
@@ -494,17 +580,18 @@ impl PartialOrd for Filename<'_> {
     }
 }
 
-impl Filenames {
+impl<'a> Filenames<'a> {
     /// Create a new `Filenames`.
     #[inline]
-    pub fn new() -> Filenames {
-        Filenames { interned: HashMap::new() }
+    pub fn new() -> Filenames<'a> {
+        Filenames { lifetime: PhantomData, interned: HashMap::new() }
     }
 
     /// Create a new `Filenames` with a size hint.
     #[inline]
-    pub fn with_capacity(size: usize) -> Filenames {
-        Filenames { interned: HashMap::with_capacity(size) }
+    pub fn with_capacity(size: usize) -> Filenames<'a> {
+        Filenames { interned: HashMap::with_capacity(size),
+                    lifetime: PhantomData }
     }
 
     /// Shring down this `Filenames` to fit the current contents.
@@ -514,7 +601,7 @@ impl Filenames {
     }
 
     /// Create a `Filename`.
-    pub fn filename(&mut self, path: &Path) ->  Result<Filename<'_>, Error> {
+    pub fn filename(&mut self, path: &Path) ->  Result<Filename<'a>, Error> {
         let path = path.canonicalize()?;
 
         match self.interned.entry(path) {
