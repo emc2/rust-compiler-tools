@@ -1,12 +1,10 @@
 [package]
 name = "compiler-tools"
 version = "0.1.0"
-authors = [ "Eric McCorkle <eric@metricspace.net>"
+authors = [ "Eric McCorkle <eric@metricspace.net>" ]
 license = "3BSD"
-keywords = []
+keywords = [ "compiler" ]
 exclude = [
     ".gitignore"
 ]
 edition = "2018"
-
-[dependencies]
