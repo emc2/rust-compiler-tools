@@ -11,6 +11,7 @@ use std::fmt::Error;
 use std::fmt::Formatter;
 use std::hash::Hash;
 use std::hash::Hasher;
+use std::marker::PhantomData;
 use std::ops::Add;
 use std::ops::AddAssign;
 use std::ops::Index;
@@ -35,7 +36,8 @@ use std::str::FromStr;
 #[derive(Copy, Eq, Ord)]
 pub struct Symbol<'a>(&'a str);
 
-pub struct Symbols {
+pub struct Symbols<'a> {
+    lifetime: PhantomData<&'a str>,
     // Interned [Strings]
     interned: HashMap<String, ()>
 }
@@ -369,17 +371,18 @@ unsafe impl Send for Symbol<'_> {}
 
 unsafe impl Sync for Symbol<'_> {}
 
-impl Symbols {
+impl<'a> Symbols<'a> {
     /// Create a new `Symbols`.
     #[inline]
-    pub fn new() -> Symbols {
-        Symbols { interned: HashMap::new() }
+    pub fn new() -> Symbols<'a> {
+        Symbols { lifetime: PhantomData, interned: HashMap::new() }
     }
 
     /// Create a new `Symbols` with a size hint.
     #[inline]
-    pub fn with_capacity(size: usize) -> Symbols {
-        Symbols { interned: HashMap::with_capacity(size) }
+    pub fn with_capacity(size: usize) -> Symbols<'a> {
+        Symbols { interned: HashMap::with_capacity(size),
+                  lifetime: PhantomData }
     }
 
     /// Shring down this `Symbols` to fit the current contents.
@@ -389,7 +392,7 @@ impl Symbols {
     }
 
     /// Internal function to create a symbol.
-    fn create_symbol_nonnull(&mut self, str: String) -> Symbol<'_> {
+    fn create_symbol_nonnull(&mut self, str: String) -> Symbol<'a> {
         match self.interned.entry(str) {
             Entry::Occupied(ent) => {
                 unsafe {
@@ -413,7 +416,8 @@ impl Symbols {
     /// Create a `Symbol` from a non-empty string.
     ///
     /// The argument `s` must not be equal to `""`.
-    pub fn symbol_nonnull<S>(&mut self, s: &S) -> Symbol<'_>
+    #[inline]
+    pub fn symbol_nonnull<S>(&mut self, s: &S) -> Symbol<'a>
     where S: ToString {
         let str = s.to_string();
 
@@ -423,7 +427,8 @@ impl Symbols {
     }
 
     /// Create a `Symbol` from a string.
-    pub fn symbol<S>(&mut self, s: &S) -> Symbol<'_>
+    #[inline]
+    pub fn symbol<S>(&mut self, s: &S) -> Symbol<'a>
     where S: ToString {
         let str = s.to_string();
 
