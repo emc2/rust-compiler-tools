@@ -1,6 +1,6 @@
 pub mod files;
 pub mod lines;
-pub mod message;
+pub mod messages;
 pub mod nondistinct;
 pub mod position;
 pub mod sources;
