@@ -1,4 +1,5 @@
 mod files;
-mod nondistinct;
 mod lines;
+mod nondistinct;
+mod position;
 mod symbol;

@@ -146,17 +146,19 @@ impl Display for FilePosition<'_> {
 
                     if start_line == end_line {
                         write!(f, "at {}:{}.{}-{}", file_offsets.filename(),
-                               start_line, start_col, end_col)
+                               start_line + 1, start_col + 1, end_col + 1)
                     } else {
                         write!(f, "at {}:{}.{}-{}.{}", file_offsets.filename(),
-                               start_line, start_col, end_line, end_col)
+                               start_line + 1, start_col + 1,
+                               end_line + 1, end_col + 1)
                     }
                 },
                 OffsetPosition::Point { point } => {
                     let (line, col) = file_offsets
                         .line_offsets().lookup(*point);
 
-                    write!(f, "at {}:{}.{}", file_offsets.filename(), line, col)
+                    write!(f, "at {}:{}.{}", file_offsets.filename(),
+                           line + 1, col + 1)
                 }
             },
             FilePosition::File { filename } => {
@@ -179,17 +181,18 @@ impl Display for BasicPosition<'_> {
                         line_offsets.val.lookup(end);
 
                     if start_line == end_line {
-                        write!(f, "at input {}.{}-{}",start_line,
-                               start_col, end_col)
+                        write!(f, "at input {}.{}-{}",
+                               start_line + 1, start_col + 1, end_col + 1)
                     } else {
-                        write!(f, "at input {}.{}-{}.{}", start_line,
-                               start_col, end_line, end_col)
+                        write!(f, "at input {}.{}-{}.{}",
+                               start_line + 1, start_col + 1,
+                               end_line + 1, end_col + 1)
                     }
                 },
                 OffsetPosition::Point { point } => {
                     let (line, col) = line_offsets.val.lookup(*point);
 
-                    write!(f, "at input {}.{}", line, col)
+                    write!(f, "at input {}.{}", line + 1, col + 1)
                 }
             },
             BasicPosition::Synthetic { desc } => desc.fmt(f),
