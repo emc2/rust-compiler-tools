@@ -4,6 +4,8 @@ use std::fmt::Error;
 use std::fmt::Formatter;
 use std::ops::Add;
 use std::ops::AddAssign;
+use std::ops::Sub;
+use std::ops::SubAssign;
 
 /// A structure holding lines in a source file.
 #[derive(Debug)]
@@ -90,6 +92,20 @@ impl From<&'_ Offset> for usize {
     #[inline]
     fn from(val: &'_ Offset) -> usize {
         val.0
+    }
+}
+
+impl Sub<usize> for Offset {
+    type Output = Offset;
+
+    fn sub(self, rhs: usize) -> Offset {
+        Offset(self.0 - rhs)
+    }
+}
+
+impl SubAssign<usize> for Offset {
+    fn sub_assign(&mut self, rhs: usize) {
+        self.0 -= rhs
     }
 }
 
