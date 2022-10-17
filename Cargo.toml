@@ -8,3 +8,6 @@ exclude = [
     ".gitignore"
 ]
 edition = "2018"
+
+[dependencies]
+termcolor = { version = "1.1.3" }
